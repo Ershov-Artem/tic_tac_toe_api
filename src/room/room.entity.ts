@@ -1,10 +1,41 @@
-export class Room {
-    constructor(code: number) {
-        this.code = code
+import { BaseEntity,
+         Column,
+         Entity } from 'ts-redis-orm'
+import { Value } from './room.gateway.entity'
+
+export class Player {
+    constructor(name: string, sign: number) {
+        this.name = name
+        this.sign = sign
     }
-    code: number
-    player1: string
-    player2: string
-    currentState: number[]
-    winner: string
+
+    name: string
+    sign: Value
+    wantsRevenge: boolean = false
 }
+
+@Entity({connection: "default", table: "Room"})
+export class Room extends BaseEntity {
+    constructor(id?: number) {
+        super()
+        this.id = id
+    }
+
+    @Column()
+    id: number = 0
+
+    @Column()
+    players: Player[] = []
+
+    @Column()
+    currentState: Value[] = [0, 0, 0,
+                             0, 0, 0,
+                             0, 0, 0]
+
+    @Column()
+    winner: number = null
+
+    @Column()
+    turn: number = 0
+}
+

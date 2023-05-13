@@ -7,24 +7,111 @@
 
   <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
     <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Tic Tac Toe API realisation based on NestJS.
+
+## API Doc
+
+### REST
+
+* POST `/room` - taking nothing, returns room code. Example response:
+```json
+{
+  "code": 3290
+}
+```
+
+### Socket.io
+
+Socket.io server works on the same port as the main app, on path `/socket.io`.
+On connection accepts query parameters `code` (room code, number) and `name`(player nickname, string).
+
+Events
+
+Incoming:
+
+* `changeMap` - is used to add new sign to map. Accepts JSON containing JWT-token and position (0 to 8) of new sign.
+
+Message body example:
+```json
+{
+  "token": "eyJhbGciOiJIUzI1Ni....",
+  "position": 1
+}
+```
+
+* `revengeRequest` - is used to request rematch after the end of current game. Accepts JSON containing JWT-token.
+
+Message body example:
+```json
+{
+  "token": "eyJhbGciOiJIUzI1Ni....",
+}
+```
+
+Outgoing:
+
+* `token` - sends JSON containing JWT-token to be used for authentication. Is sent only once on new client connection (only to this client).
+
+Message body example:
+```json
+{
+  "token": "eyJhbGciOiJIUzI1Ni....",
+}
+```
+
+* `roomState` - sends current room state as JSON. Is sent to all clients in room when some changes happen. Is also sent on new client connection and on rematch accept.
+
+Message body example:
+```json
+{
+  "id": 5564,
+  "players": [
+    {
+      "wantsRevenge": false,
+      "name": "xX_ryan69gosling_Xx",
+      "sign": 1
+    }
+  ],
+  "currentState": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  "winner": 0,
+  "turn": 0,
+  "createdAt": "2023-05-13T22:57:01.510Z"
+}
+```
+
+* `win` - is sent to the winner after the end of current game. Contains JSON with winner inside of it
+
+Message body example:
+```json
+{
+  "winner": {
+    "wantsRevenge": false,
+    "name": "xX_ryan69gosling_Xx",
+    "sign": 1
+  }
+}
+```
+
+* `lose` - is sent to the loser after the end of current game. Contains JSON with winner inside of it
+
+Message body example:
+```json
+{
+  "winner": {
+    "wantsRevenge": false,
+    "name": "xX_ryan69gosling_Xx",
+    "sign": 1
+  }
+}
+```
+
+* `revengeRequest` - when one of the players request the rematch (via `revengeRequest` client incoming event) it is sent to the second player.
+* `revenge` - is sent to all players in the room when all of them accepted rematch.
+* `disconnected` - when one of the players leaves room, it is sent to other player.
+* `message` - is used for some extraordinary events, contains raw string with description. Usually is used for errors.
 
 ## Installation
 
@@ -44,30 +131,3 @@ $ yarn run start:dev
 # production mode
 $ yarn run start:prod
 ```
-
-## Test
-
-```bash
-# unit tests
-$ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).

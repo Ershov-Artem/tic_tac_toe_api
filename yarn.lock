@@ -984,6 +984,13 @@
   dependencies:
     "@types/node" "*"
 
+"@types/ioredis@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@types/ioredis/-/ioredis-5.0.0.tgz#c1ea7e2f3e2c5a942a27cfee6f62ddcfb23fb3e7"
+  integrity sha512-zJbJ3FVE17CNl5KXzdeSPtdltc4tMT3TzC6fxQS0sQngkbFZ6h+0uTafsRqu+eSLIugf6Yb0Ea0SUuRr42Nk9g==
+  dependencies:
+    ioredis "*"
+
 "@types/istanbul-lib-coverage@*", "@types/istanbul-lib-coverage@^2.0.0", "@types/istanbul-lib-coverage@^2.0.1":
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/@types/istanbul-lib-coverage/-/istanbul-lib-coverage-2.0.4.tgz#8467d4b3c087805d63580480890791277ce35c44"
@@ -2834,7 +2841,7 @@ interpret@^1.0.0:
   resolved "https://registry.yarnpkg.com/interpret/-/interpret-1.4.0.tgz#665ab8bc4da27a774a40584e812e3e0fa45b1a1e"
   integrity sha512-agE4QfB2Lkp9uICn7BAqoscw4SZP9kTE2hxiFI3jBPmXJfdqiahTbUuKGsMoN2GtqL9AxhYioAcVvgsb1HvRbA==
 
-ioredis@^5.3.2:
+ioredis@*, ioredis@^5.2.4, ioredis@^5.3.2:
   version "5.3.2"
   resolved "https://registry.yarnpkg.com/ioredis/-/ioredis-5.3.2.tgz#9139f596f62fc9c72d873353ac5395bcf05709f7"
   integrity sha512-1DKMMzlIHM02eBBVOFQ1+AolGjs6+xEcM4PDL7NqOS6szq7H9jSaEkIUH6/a5Hl241LzW6JLSiAbNvTQjUupUA==
@@ -4675,6 +4682,15 @@ ts-node@^10.0.0:
     make-error "^1.1.1"
     v8-compile-cache-lib "^3.0.1"
     yn "3.1.1"
+
+ts-redis-orm@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/ts-redis-orm/-/ts-redis-orm-1.1.1.tgz#0418ac5fe9105a9266120c6eefe983a4caf0a1df"
+  integrity sha512-jE9veEASgCloFZ9UXmZfbUgwo84hkmumlAdrTWfTUE4+fZZXSaHEhJ3iI8sBgEvwnPNKDEyAu3IkBtat6LoUSA==
+  dependencies:
+    "@types/ioredis" "^5.0.0"
+    ioredis "^5.2.4"
+    reflect-metadata "^0.1.13"
 
 tsconfig-paths-webpack-plugin@4.0.1:
   version "4.0.1"

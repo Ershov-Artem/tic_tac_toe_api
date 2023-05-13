@@ -1,7 +1,8 @@
-import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway } from "@nestjs/websockets";
-import { ChangeMapDto, EnterRoomDto, Value } from "./room.gateway.entity";
+import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WsException } from "@nestjs/websockets";
+import { EnterRoomDto } from "./room.gateway.entity";
 import { RoomGatewayService } from "./room.gateway.service";
 import { Socket } from 'socket.io';
+import { Room } from "./room.entity";
 
 @WebSocketGateway({ 
     // path: '/ws',
@@ -10,52 +11,90 @@ import { Socket } from 'socket.io';
 export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
     constructor(private readonly roomGatewayService: RoomGatewayService) {}
 
-    private connectedUsers: Map<number, Map<string, Socket>> = new Map()
+    async handleConnection(client: Socket, ...args: any[]) {
 
-    handleConnection(client: Socket, ...args: any[]) {
         console.log(client.handshake.query);
         
         const code = parseInt(client.handshake.query.code as string)
         const name = client.handshake.query.name as string
 
-        this.connectedUsers.set(code, this.connectedUsers.get(code) || new Map())
-        this.connectedUsers.get(code).set(name, client)
+        let roomState: Room
+        try{
+            roomState = await this.roomGatewayService.addPlayer({code: code, name: name})
+        } catch(e) {
+            client.emit('message', e.message)
+            return
+        }
+        client.join(`${code}`)
 
-        this.roomGatewayService.addPlayer({code: code, name: name})
-
-        client.emit('token', this.roomGatewayService.getToken({code: code, name: name}))
+        client.emit('token', JSON.stringify(
+            {token: this.roomGatewayService.getToken({code: code, name: name})}
+        ))
+        client.emit('roomState', JSON.stringify(roomState))
+        client.in(`${code}`).emit('roomState', JSON.stringify(roomState))
     }
 
-    handleDisconnect(client: Socket, ...args: any[]) {
+    async handleDisconnect(client: Socket, ...args: any[]) {
         const code = parseInt(client.handshake.query.code as string)
         const name = client.handshake.query.name as string
 
-        this.connectedUsers.get(code).delete(name)
-        if (this.connectedUsers.get(code).size == 0) this.connectedUsers.delete(code)
+        client.in(`${code}`).emit('disconnected', JSON.stringify({message: "Partner disconnected"}))
+        client.leave(`${code}`)
+        await this.roomGatewayService.deletePlayer({code: code, name: name})
     }
 
     @SubscribeMessage('changeMap')
     async handleChangeMapEvent(@MessageBody() rawChange: string, @ConnectedSocket() clientSocket: Socket) {
         const change = JSON.parse(rawChange)
-        console.log(change.token);
+        console.log(change.token)
         
         let authData: EnterRoomDto
 
         try {
             authData = this.roomGatewayService.verifyToken(change.token)
 
-            const changedMap = await this.roomGatewayService.changeMap(authData, change)
-            console.log(changedMap)
-                
-            this.connectedUsers.get(authData.code).forEach((socket, player) => {
-                console.log(player)
-                socket.emit('changeMap', changedMap)
-            })
-    
+            const [roomState, winner] = await this.roomGatewayService.changeMap(authData, change)
+            console.log(roomState)
+
+            clientSocket.in(`${authData.code}`).emit('roomState', JSON.stringify(roomState))
+            clientSocket.emit('roomState', JSON.stringify(roomState))
+
+            if (winner) {
+                clientSocket.in(`${authData.code}`).emit('lose', JSON.stringify({ winner: winner }))
+                clientSocket.emit('win', JSON.stringify({ winner: winner }))
+            }
         } catch (error) {
             console.log(error);
             
-            return clientSocket.send({ error: error.toString() })
+            clientSocket.emit('message', error.message)
+        }
+
+    }
+
+    @SubscribeMessage('revengeRequest')
+    async handleRevengeRequestEvent(@MessageBody() rawData: string, @ConnectedSocket() clientSocket: Socket) {
+        const data = JSON.parse(rawData)
+        console.log(data.token)
+        
+        let authData: EnterRoomDto
+
+        try {
+            authData = this.roomGatewayService.verifyToken(data.token)
+
+            const accepted = await this.roomGatewayService.requestRevenge(authData)
+            if (!accepted) {
+                clientSocket.in(`${authData.code}`).emit('revengeRequest')
+            } else {
+                const roomState = await this.roomGatewayService.resetRoom(authData)
+                clientSocket.in(`${authData.code}`).emit('revenge')
+                clientSocket.emit('revenge')
+                clientSocket.in(`${authData.code}`).emit('roomState', JSON.stringify(roomState))
+                clientSocket.emit('roomState', JSON.stringify(roomState))
+            }
+        } catch (error) {
+            console.log(error);
+            
+            clientSocket.emit('message', error.message)
         }
 
     }
