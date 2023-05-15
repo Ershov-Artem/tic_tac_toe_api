@@ -63,7 +63,7 @@ export class RoomGatewayService {
         let winner = null
         if (winnerSign) {
             winner = room.players.find((p, _, __) => p.sign == winnerSign)
-            room.winner = winner.name
+            room.winner = room.players.indexOf(winner)
         }
 
         room.turn = 1 - room.turn

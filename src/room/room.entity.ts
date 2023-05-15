@@ -34,7 +34,7 @@ export class Room extends BaseEntity {
                              0, 0, 0]
 
     @Column()
-    winner: string = ''
+    winner: number = -1
 
     @Column()
     turn: Value = null
