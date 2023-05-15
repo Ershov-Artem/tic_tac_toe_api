@@ -32,7 +32,11 @@ export class RoomGatewayService {
         console.log(room.players)
         room.players = room.players.filter((p, _, __) => p.name != authData.name)
         console.log(room.players)
-        await room.save()
+        if (room.players.length == 0){
+            await room.delete()
+        } else {
+            await room.save()
+        }
     }
 
     async changeMap(authData: EnterRoomDto, change: ChangeMapDto): Promise<[Room, Player]> {
