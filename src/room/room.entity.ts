@@ -19,6 +19,7 @@ export class Room extends BaseEntity {
     constructor(id?: number) {
         super()
         this.id = id
+        this.turn = 1
     }
 
     @Column()
