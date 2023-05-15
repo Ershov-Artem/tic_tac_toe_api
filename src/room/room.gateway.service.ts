@@ -44,7 +44,7 @@ export class RoomGatewayService {
 
         console.log(room)
 
-        if (room.players[room.turn].name != authData.name) {
+        if (room.players.find((p,_,__)=>p.name==authData.name).sign != room.turn) {
             throw new WsException('not your turn kirill pidor :(')
         }
 
@@ -91,7 +91,7 @@ export class RoomGatewayService {
 
         room.winner = null
 
-        room.turn = 1;
+        room.turn = Value.CROSS;
 
         return (await room.save())[0]
     }

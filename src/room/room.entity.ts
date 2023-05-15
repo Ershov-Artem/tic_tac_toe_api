@@ -19,7 +19,7 @@ export class Room extends BaseEntity {
     constructor(id?: number) {
         super()
         this.id = id
-        this.turn = 1
+        this.turn = Value.CROSS
     }
 
     @Column()
@@ -37,6 +37,6 @@ export class Room extends BaseEntity {
     winner: number = null
 
     @Column()
-    turn: number = null
+    turn: Value = null
 }
 
