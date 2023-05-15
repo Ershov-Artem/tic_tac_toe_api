@@ -82,6 +82,7 @@ export class RoomGatewayService {
                              0, 0, 0]
         for (const player of room.players) {
             player.sign = 3 - player.sign
+            player.wantsRevenge = false
         }
 
         return (await room.save())[0]
