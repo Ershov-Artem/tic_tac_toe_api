@@ -36,6 +36,6 @@ export class Room extends BaseEntity {
     winner: number = null
 
     @Column()
-    turn: number = 0
+    turn: number = null
 }
 

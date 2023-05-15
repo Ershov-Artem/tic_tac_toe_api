@@ -13,7 +13,8 @@ export class RoomService {
             code = this.generateCode()
         }
 
-        const [newRoom] = await new Room(code).save()
-        return newRoom
+        const newRoom = new Room(code)
+        newRoom.turn = 1
+        return await newRoom.save()[0]
     }
 }

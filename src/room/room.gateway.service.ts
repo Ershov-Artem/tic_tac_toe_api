@@ -89,6 +89,10 @@ export class RoomGatewayService {
             player.wantsRevenge = false
         }
 
+        room.winner = null
+
+        room.turn = 1;
+
         return (await room.save())[0]
     }
 
